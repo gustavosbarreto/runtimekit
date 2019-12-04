@@ -26,6 +26,11 @@ var (
 	}
 )
 
+const (
+	DefaultConnectionURL = "/connection"
+	DefaultRevdialURL    = "/revdial"
+)
+
 const ProxiedFromDeviceHeader = "proxied-from-device"
 
 func ProxyResponseFromDevice(w http.ResponseWriter, resp *http.Response) {

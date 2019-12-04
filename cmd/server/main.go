@@ -36,7 +36,7 @@ func ProxyResponseFromDevice(w http.ResponseWriter, resp *http.Response) {
 }
 
 func main() {
-	rev := reverse.NewReverse("/connection", "/revdial")
+	rev := reverse.NewReverse(reverse.DefaultConnectionURL, reverse.DefaultRevdialURL)
 	router := rev.Router().(*mux.Router)
 
 	router.HandleFunc("/go", func(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +46,6 @@ func main() {
 		)
 
 		rev.ProxyRequest("merda", r.Context(), w, req)
-
 	})
 
 	http.ListenAndServe(":1313", router)
