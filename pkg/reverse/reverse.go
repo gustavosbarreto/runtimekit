@@ -96,7 +96,7 @@ func (r *Reverse) SendRequest(ctx context.Context, id string, req *http.Request)
 	return resp, nil
 }
 
-func (r *Reverse) CopyResponse(resp *http.Response, w http.ResponseWriter) {
+func (r *Reverse) ForwardResponse(resp *http.Response, w http.ResponseWriter) {
 	for key, values := range resp.Header {
 		for _, value := range values {
 			w.Header().Add(key, value)

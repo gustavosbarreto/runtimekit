@@ -20,7 +20,7 @@ func main() {
 
 		res, err := rev.SendRequest(r.Context(), "merda", req)
 		fmt.Println(err)
-		rev.CopyResponse(res, w)
+		rev.ForwardResponse(res, w)
 	})
 
 	http.ListenAndServe(":1313", router)
