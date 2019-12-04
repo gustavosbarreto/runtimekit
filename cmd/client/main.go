@@ -22,6 +22,7 @@ func main() {
 	router := mux.NewRouter()
 
 	req, _ := http.NewRequest("", "", nil)
+	req.Header.Set("X-CLIENT-ID", "merda")
 
 	wsConn, _, _ := websocket.DefaultDialer.Dial("ws://localhost:1313/connection", req.Header)
 
