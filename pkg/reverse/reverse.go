@@ -30,10 +30,6 @@ const (
 	DefaultRevdialURL    = "/revdial"
 )
 
-func ProxyResponseFromDevice(w http.ResponseWriter, resp *http.Response) {
-
-}
-
 type Reverse struct {
 	ConnectionPath    string
 	DialerPath        string
