@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -47,11 +46,9 @@ func NewReverse(connectionPath, dialerPath string) *Reverse {
 		ConnectionPath: connectionPath,
 		DialerPath:     dialerPath,
 		ConnectionHandler: func(r *http.Request) (string, error) {
-			fmt.Println("default connection handler")
-
 			id := r.Header.Get("X-CLIENT-ID")
 			if id == "" {
-				return id, errors.New("invalid id")
+				return id, errors.New("X-CLIENT-ID header is missing")
 			}
 
 			return id, nil
@@ -85,31 +82,32 @@ func (r *Reverse) Router() http.Handler {
 	return router
 }
 
-func (r *Reverse) ProxyRequest(ctx context.Context, id string, res http.ResponseWriter, req *http.Request) {
-	deviceConn, err := r.connman.Dial(ctx, id)
+func (r *Reverse) SendRequest(ctx context.Context, id string, req *http.Request) (*http.Response, error) {
+	conn, err := r.connman.Dial(ctx, id)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	if err := req.Write(deviceConn); err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
+	if err := req.Write(conn); err != nil {
+		return nil, err
 	}
 
-	resp, err := http.ReadResponse(bufio.NewReader(deviceConn), req)
+	resp, err := http.ReadResponse(bufio.NewReader(conn), req)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
+	return resp, nil
+}
+
+func (r *Reverse) CopyResponse(resp *http.Response, w http.ResponseWriter) {
 	for key, values := range resp.Header {
 		for _, value := range values {
-			res.Header().Add(key, value)
+			w.Header().Add(key, value)
 		}
 	}
 
-	res.WriteHeader(resp.StatusCode)
-	io.Copy(res, resp.Body)
+	w.WriteHeader(resp.StatusCode)
+	io.Copy(w, resp.Body)
 	resp.Body.Close()
 }

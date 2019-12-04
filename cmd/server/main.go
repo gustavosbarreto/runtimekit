@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -17,7 +18,9 @@ func main() {
 			nil,
 		)
 
-		rev.ProxyRequest(r.Context(), "merda", w, req)
+		res, err := rev.SendRequest(r.Context(), "merda", req)
+		fmt.Println(err)
+		rev.CopyResponse(res, w)
 	})
 
 	http.ListenAndServe(":1313", router)
