@@ -17,7 +17,7 @@ func main() {
 			nil,
 		)
 
-		rev.ProxyRequest("merda", r.Context(), w, req)
+		rev.ProxyRequest(r.Context(), "merda", w, req)
 	})
 
 	http.ListenAndServe(":1313", router)

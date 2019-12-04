@@ -35,7 +35,6 @@ func main() {
 
 	router.HandleFunc("/merda", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("/merda")
-
 		w.WriteHeader(http.StatusOK)
 
 		io.WriteString(w, `{"alive": true}`)

@@ -31,19 +31,8 @@ const (
 	DefaultRevdialURL    = "/revdial"
 )
 
-const ProxiedFromDeviceHeader = "proxied-from-device"
-
 func ProxyResponseFromDevice(w http.ResponseWriter, resp *http.Response) {
-	for key, values := range resp.Header {
-		for _, value := range values {
-			w.Header().Add(key, value)
-		}
-	}
-	w.Header().Set(ProxiedFromDeviceHeader, "")
 
-	w.WriteHeader(resp.StatusCode)
-	io.Copy(w, resp.Body)
-	resp.Body.Close()
 }
 
 type Reverse struct {
@@ -96,20 +85,31 @@ func (r *Reverse) Router() http.Handler {
 	return router
 }
 
-func (r *Reverse) ProxyRequest(id string, ctx context.Context, res http.ResponseWriter, req *http.Request) {
+func (r *Reverse) ProxyRequest(ctx context.Context, id string, res http.ResponseWriter, req *http.Request) {
 	deviceConn, err := r.connman.Dial(ctx, id)
 	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err := req.Write(deviceConn); err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	resp, err := http.ReadResponse(bufio.NewReader(deviceConn), req)
 	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	ProxyResponseFromDevice(res, resp)
+	for key, values := range resp.Header {
+		for _, value := range values {
+			res.Header().Add(key, value)
+		}
+	}
+
+	res.WriteHeader(resp.StatusCode)
+	io.Copy(res, resp.Body)
+	resp.Body.Close()
 }
