@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/function61/holepunch-server/pkg/wsconnadapter"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/runtimekit/runtimekit/pkg/revdial"
+	"github.com/gustavosbarreto/httptunnel/pkg/revdial"
+	"github.com/gustavosbarreto/httptunnel/pkg/wsconnadapter"
 )
 
 func Revdial(ctx context.Context, path string) (*websocket.Conn, *http.Response, error) {

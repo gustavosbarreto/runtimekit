@@ -1,4 +1,4 @@
-package reverse
+package httptunnel
 
 import (
 	"bufio"
@@ -9,9 +9,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/connman"
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/revdial"
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/wsconnadapter"
+	"github.com/gustavosbarreto/httptunnel/pkg/connman"
+	"github.com/gustavosbarreto/httptunnel/pkg/revdial"
+	"github.com/gustavosbarreto/httptunnel/pkg/wsconnadapter"
 )
 
 var (
@@ -30,15 +30,15 @@ const (
 	DefaultRevdialURL    = "/revdial"
 )
 
-type Reverse struct {
+type Tunnel struct {
 	ConnectionPath    string
 	DialerPath        string
 	ConnectionHandler func(*http.Request) (string, error)
 	connman           *connman.ConnectionManager
 }
 
-func NewReverse(connectionPath, dialerPath string) *Reverse {
-	return &Reverse{
+func NewTunnel(connectionPath, dialerPath string) *Tunnel {
+	return &Tunnel{
 		ConnectionPath: connectionPath,
 		DialerPath:     dialerPath,
 		ConnectionHandler: func(r *http.Request) (string, error) {
@@ -53,33 +53,33 @@ func NewReverse(connectionPath, dialerPath string) *Reverse {
 	}
 }
 
-func (r *Reverse) Router() http.Handler {
+func (t *Tunnel) Router() http.Handler {
 	router := mux.NewRouter()
 
-	router.HandleFunc(r.ConnectionPath, func(res http.ResponseWriter, req *http.Request) {
+	router.HandleFunc(t.ConnectionPath, func(res http.ResponseWriter, req *http.Request) {
 		conn, err := upgrader.Upgrade(res, req, nil)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		id, err := r.ConnectionHandler(req)
+		id, err := t.ConnectionHandler(req)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			defer conn.Close()
 			return
 		}
 
-		r.connman.Set(id, wsconnadapter.New(conn))
+		t.connman.Set(id, wsconnadapter.New(conn))
 	}).Methods("GET")
 
-	router.Handle(r.DialerPath, revdial.ConnHandler(upgrader)).Methods("GET")
+	router.Handle(t.DialerPath, revdial.ConnHandler(upgrader)).Methods("GET")
 
 	return router
 }
 
-func (r *Reverse) SendRequest(ctx context.Context, id string, req *http.Request) (*http.Response, error) {
-	conn, err := r.connman.Dial(ctx, id)
+func (t *Tunnel) SendRequest(ctx context.Context, id string, req *http.Request) (*http.Response, error) {
+	conn, err := t.connman.Dial(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (r *Reverse) SendRequest(ctx context.Context, id string, req *http.Request)
 	return resp, nil
 }
 
-func (r *Reverse) ForwardResponse(resp *http.Response, w http.ResponseWriter) {
+func (t *Tunnel) ForwardResponse(resp *http.Response, w http.ResponseWriter) {
 	for key, values := range resp.Header {
 		for _, value := range values {
 			w.Header().Add(key, value)

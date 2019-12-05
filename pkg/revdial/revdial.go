@@ -32,7 +32,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/wsconnadapter"
+	"github.com/gustavosbarreto/httptunnel/pkg/wsconnadapter"
 )
 
 // dialerUniqParam is the parameter name of the GET URL form value

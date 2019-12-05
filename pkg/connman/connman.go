@@ -6,7 +6,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/revdial"
+	"github.com/gustavosbarreto/httptunnel/pkg/revdial"
 )
 
 var (

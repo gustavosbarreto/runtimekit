@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/gustavosbarreto/revwebsocketdial/pkg/reverse"
+	"github.com/gustavosbarreto/httptunnel"
 )
 
 func main() {
-	rev := reverse.NewReverse(reverse.DefaultConnectionURL, reverse.DefaultRevdialURL)
-	router := rev.Router().(*mux.Router)
+	tunnel := httptunnel.NewTunnel(httptunnel.DefaultConnectionURL, httptunnel.DefaultRevdialURL)
+	router := tunnel.Router().(*mux.Router)
 
 	router.HandleFunc("/go", func(w http.ResponseWriter, r *http.Request) {
 		req, _ := http.NewRequest(
@@ -18,9 +18,9 @@ func main() {
 			nil,
 		)
 
-		res, err := rev.SendRequest(r.Context(), "merda", req)
+		res, err := tunnel.SendRequest(r.Context(), "merda", req)
 		fmt.Println(err)
-		rev.ForwardResponse(res, w)
+		tunnel.ForwardResponse(res, w)
 	})
 
 	http.ListenAndServe(":1313", router)
