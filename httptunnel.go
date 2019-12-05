@@ -71,9 +71,9 @@ func (t *Tunnel) Router() http.Handler {
 		}
 
 		t.connman.Set(id, wsconnadapter.New(conn))
-	}).Methods("GET")
+	}).Methods(http.MethodGet)
 
-	router.Handle(t.DialerPath, revdial.ConnHandler(upgrader)).Methods("GET")
+	router.Handle(t.DialerPath, revdial.ConnHandler(upgrader)).Methods(http.MethodGet)
 
 	return router
 }

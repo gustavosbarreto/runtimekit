@@ -21,7 +21,7 @@ func Revdial(ctx context.Context, path string) (*websocket.Conn, *http.Response,
 func main() {
 	router := mux.NewRouter()
 
-	req, _ := http.NewRequest("", "", nil)
+	req, _ := http.NewRequest("GET", "", nil)
 	req.Header.Set("X-CLIENT-ID", "merda")
 
 	wsConn, _, _ := websocket.DefaultDialer.Dial("ws://localhost:1313/connection", req.Header)
